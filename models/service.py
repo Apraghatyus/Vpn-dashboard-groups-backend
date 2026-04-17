@@ -35,3 +35,18 @@ class Service:
             endpoint=data["endpoint"],
             category=data["category"],
         )
+
+
+@dataclass
+class NewServiceDTO:
+    name: str
+    endpoint: str
+    category: str
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "NewServiceDTO":
+        return cls(
+            name=data["name"],
+            endpoint=data["endpoint"],
+            category=data["category"],
+        )

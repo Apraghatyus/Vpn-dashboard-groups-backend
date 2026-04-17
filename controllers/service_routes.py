@@ -3,7 +3,7 @@
 from flask import Blueprint, request, jsonify
 from services.service_service import service_service
 from services.auth_service import require_auth
-from models.service import Service
+from models.service import NewServiceDTO
 
 service_bp = Blueprint("services", __name__, url_prefix="/api/services")
 
@@ -20,9 +20,9 @@ def get_all():
 def create():
     data = request.get_json(silent=True) or {}
     try:
-        svc = Service.from_dict(data)
+        dto = NewServiceDTO.from_dict(data)
     except (KeyError, TypeError) as e:
         return jsonify({"error": f"Datos inválidos: {e}"}), 400
 
-    created = service_service.create(svc)
+    created = service_service.create(dto)
     return jsonify(created.to_dict()), 201

@@ -1,6 +1,7 @@
 """Service service — business logic for VPN service management."""
 
-from models.service import Service
+import time
+from models.service import Service, NewServiceDTO
 from repositories.service_repo import service_repo
 
 
@@ -14,7 +15,13 @@ class ServiceService:
     def get_by_category(self) -> dict[str, list[Service]]:
         return service_repo.get_by_category()
 
-    def create(self, service: Service) -> Service:
+    def create(self, dto: NewServiceDTO) -> Service:
+        service = Service(
+            id=f"svc-{int(time.time() * 1000)}",
+            name=dto.name,
+            endpoint=dto.endpoint,
+            category=dto.category,
+        )
         return service_repo.add(service)
 
     def count(self) -> int:

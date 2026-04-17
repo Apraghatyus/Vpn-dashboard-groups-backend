@@ -12,34 +12,42 @@ class AccessRepository(BaseRepository[AccessEntry]):
         )
 
     def has_access(self, role_id: str, service_id: str) -> bool:
-        return any(
-            e.role_id == role_id and e.service_id == service_id
-            for e in self.get_all()
-        )
+        with self._lock:
+            return any(
+                d.get("roleId") == role_id and d.get("serviceId") == service_id
+                for d in self._read_raw()
+            )
 
     def get_for_role(self, role_id: str) -> list[AccessEntry]:
-        return [e for e in self.get_all() if e.role_id == role_id]
+        with self._lock:
+            return [
+                self._deserialize(d)
+                for d in self._read_raw()
+                if d.get("roleId") == role_id
+            ]
 
     def toggle(self, role_id: str, service_id: str) -> list[AccessEntry]:
-        entries = self.get_all()
-        exists = any(
-            e.role_id == role_id and e.service_id == service_id for e in entries
-        )
-        if exists:
-            entries = [
-                e for e in entries
-                if not (e.role_id == role_id and e.service_id == service_id)
-            ]
-        else:
-            entries.append(AccessEntry(role_id=role_id, service_id=service_id))
-
-        self.replace_all(entries)
-        return entries
+        with self._lock:
+            data = self._read_raw()
+            exists = any(
+                d.get("roleId") == role_id and d.get("serviceId") == service_id
+                for d in data
+            )
+            if exists:
+                data = [
+                    d for d in data
+                    if not (d.get("roleId") == role_id and d.get("serviceId") == service_id)
+                ]
+            else:
+                data.append({"roleId": role_id, "serviceId": service_id})
+            self._write_raw(data)
+            return [self._deserialize(d) for d in data]
 
     def remove_role(self, role_id: str) -> None:
         """Remove all entries for a role."""
-        entries = [e for e in self.get_all() if e.role_id != role_id]
-        self.replace_all(entries)
+        with self._lock:
+            data = [d for d in self._read_raw() if d.get("roleId") != role_id]
+            self._write_raw(data)
 
 
 access_repo = AccessRepository()

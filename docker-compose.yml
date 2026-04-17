@@ -10,16 +10,19 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: wg-acl-backend
+    env_file: .env
     volumes:
-      - ./data/roles.yaml:/app/data/roles.yaml
+      - wg-acl-data:/app/data
       - ./scripts:/app/scripts:ro
     environment:
       - FLASK_ENV=production
-      - ROLES_FILE=/app/data/roles.yaml
+      - SECRET_KEY=${SECRET_KEY:-wg-acl-change-me-in-production}
+      - DEFAULT_ADMIN_USER=${DEFAULT_ADMIN_USER:-admin}
+      - DEFAULT_ADMIN_PASS=${DEFAULT_ADMIN_PASS:-admin}
     expose:
       - "5000"
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5000/health')"]
       interval: 30s
       timeout: 5s
       retries: 3
@@ -32,3 +35,6 @@ networks:
   wg-acl:
     name: wg-acl-network
     external: true
+
+volumes:
+  wg-acl-data:

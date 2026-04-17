@@ -13,7 +13,7 @@ from flask import Flask, jsonify
 from flask_cors import CORS
 
 from config import Config
-from routes import ALL_BLUEPRINTS
+from controllers import ALL_BLUEPRINTS
 from data.seed import seed_all
 
 
