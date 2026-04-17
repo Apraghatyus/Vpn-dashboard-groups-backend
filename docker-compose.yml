@@ -1,0 +1,34 @@
+# ═══════════════════════════════════════════════
+# WG-ACL Manager — Backend (Flask)
+# Proyecto independiente — se conecta al frontend
+# por red Docker compartida (wg-acl-network)
+# ═══════════════════════════════════════════════
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: wg-acl-backend
+    volumes:
+      - ./data/roles.yaml:/app/data/roles.yaml
+      - ./scripts:/app/scripts:ro
+    environment:
+      - FLASK_ENV=production
+      - ROLES_FILE=/app/data/roles.yaml
+    expose:
+      - "5000"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+    networks:
+      - wg-acl
+
+networks:
+  wg-acl:
+    name: wg-acl-network
+    external: true

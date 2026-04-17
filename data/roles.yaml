@@ -1,0 +1,8 @@
+# WireGuard ACL — generado por WG-ACL Manager
+# Este archivo será gestionado por el backend
+
+roles:
+  admin:
+    description: "Acceso total a toda la infraestructura"
+    rules:
+      - "*"
