@@ -1,6 +1,6 @@
 """Peer routes — CRUD for VPN peers."""
 
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, Response
 from services.peer_service import peer_service
 from services.access_service import access_service
 from services.auth_service import require_auth
@@ -50,6 +50,21 @@ def update_role(peer_id: str):
     if not peer:
         return jsonify({"error": "Peer no encontrado"}), 404
     return jsonify(peer.to_dict())
+
+
+@peer_bp.route("/<peer_id>/config", methods=["GET"])
+@require_auth
+def download_config(peer_id: str):
+    content = peer_service.generate_config(peer_id)
+    if not content:
+        return jsonify({"error": "Peer no encontrado"}), 404
+    peer = peer_service.get_by_id(peer_id)
+    filename = f"{peer.username}.conf"
+    return Response(
+        content,
+        mimetype="text/plain",
+        headers={"Content-Disposition": f"attachment; filename={filename}"},
+    )
 
 
 @peer_bp.route("/<peer_id>", methods=["PUT"])

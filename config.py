@@ -45,3 +45,10 @@ class Config:
     ADGUARD_URL = os.environ.get("ADGUARD_URL", "")
     ADGUARD_USER = os.environ.get("ADGUARD_USER", "")
     ADGUARD_PASS = os.environ.get("ADGUARD_PASS", "")
+
+    # WireGuard server
+    WG_SERVER_PUBLIC_KEY = os.environ.get("WG_SERVER_PUBLIC_KEY", "")
+    WG_SERVER_ENDPOINT   = os.environ.get("WG_SERVER_ENDPOINT", "")
+    WG_PORT              = os.environ.get("WG_PORT", "51820")
+    WG_SUBNET            = os.environ.get("WG_SUBNET", "10.8.0.0/24")
+    WG_DNS               = os.environ.get("WG_DNS", "10.8.0.1")

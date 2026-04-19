@@ -3,6 +3,7 @@
 import time
 from models.peer import Peer, NewPeerDTO
 from repositories.peer_repo import peer_repo
+from config import Config
 
 
 class PeerService:
@@ -63,6 +64,29 @@ class PeerService:
 
     def count(self) -> int:
         return peer_repo.count()
+
+    def generate_config(self, peer_id: str) -> str | None:
+        peer = peer_repo.get_by_id(peer_id)
+        if not peer:
+            return None
+
+        subnet_prefix = Config.WG_SUBNET.split("/")[1]
+
+        lines = [
+            f"# WireGuard config — {peer.display_name}",
+            "",
+            "[Interface]",
+            f"PrivateKey = <PEGAR_CLAVE_PRIVADA_DEL_DISPOSITIVO>",
+            f"Address = {peer.ip}/{subnet_prefix}",
+            f"DNS = {Config.WG_DNS}",
+            "",
+            "[Peer]",
+            f"PublicKey = {Config.WG_SERVER_PUBLIC_KEY or '<CLAVE_PUBLICA_DEL_SERVIDOR>'}",
+            f"Endpoint = {Config.WG_SERVER_ENDPOINT or '<IP_PUBLICA_DEL_SERVIDOR>'}:{Config.WG_PORT}",
+            f"AllowedIPs = {Config.WG_SUBNET}",
+            "PersistentKeepalive = 25",
+        ]
+        return "\n".join(lines)
 
 
 peer_service = PeerService()
