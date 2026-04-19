@@ -3,6 +3,7 @@
 from flask import Blueprint, request, jsonify
 from services.vpn_user_service import vpn_user_service
 from services.auth_service import require_auth
+from models.vpn_user import NewVpnUserDTO
 
 vpn_user_bp = Blueprint("vpn_users", __name__, url_prefix="/api/vpn-users")
 
