@@ -23,3 +23,9 @@ def download():
         mimetype="text/yaml",
         headers={"Content-Disposition": "attachment; filename=wg-acl.yaml"},
     )
+
+@yaml_bp.route("/sync", methods=["POST"])
+@require_auth
+def sync():
+    content = yaml_service.save_to_file()
+    return jsonify({"message": "ACL sincronizada", "yaml": content})

@@ -34,3 +34,5 @@ class Config:
     # Default admin credentials (only used for initial seed)
     DEFAULT_ADMIN_USER = os.environ.get("DEFAULT_ADMIN_USER", "admin")
     DEFAULT_ADMIN_PASS = os.environ.get("DEFAULT_ADMIN_PASS", "admin")
+    # ACL output (bind-mounted to host)
+    ACL_OUTPUT = os.environ.get("ACL_OUTPUT", YAML_OUTPUT)
