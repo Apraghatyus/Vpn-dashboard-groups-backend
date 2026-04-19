@@ -22,6 +22,8 @@ class PeerService:
             status="offline",
             last_seen="ahora",
             created_at=time.time(),
+            user_id=dto.user_id,
+            device_name=dto.device_name,
         )
         return peer_repo.add(peer)
 

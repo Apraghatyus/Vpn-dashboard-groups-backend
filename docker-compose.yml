@@ -1,32 +1,61 @@
 # ═══════════════════════════════════════════════
-# WG-ACL Manager — Backend (Flask)
-# Proyecto independiente — se conecta al frontend
-# por red Docker compartida (wg-acl-network)
+# WG-ACL Manager — Backend (Flask) + MariaDB
 # ═══════════════════════════════════════════════
 
 services:
+  mariadb:
+    image: mariadb:11
+    container_name: wg-acl-mariadb
+    restart: unless-stopped
+    environment:
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASS:-rootpassword}
+      MARIADB_DATABASE: ${DB_NAME:-wgacl}
+      MARIADB_USER: ${DB_USER:-wgacl}
+      MARIADB_PASSWORD: ${DB_PASS:-wgacl}
+    volumes:
+      - wg-acl-mariadb:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - wg-acl
+
   backend:
     build:
       context: .
       dockerfile: Dockerfile
     container_name: wg-acl-backend
     env_file: .env
+    environment:
+      FLASK_ENV: production
+      SECRET_KEY: ${SECRET_KEY:-wg-acl-change-me-in-production}
+      DEFAULT_ADMIN_USER: ${DEFAULT_ADMIN_USER:-admin}
+      DEFAULT_ADMIN_PASS: ${DEFAULT_ADMIN_PASS:-admin}
+      DB_HOST: mariadb
+      DB_PORT: "3306"
+      DB_NAME: ${DB_NAME:-wgacl}
+      DB_USER: ${DB_USER:-wgacl}
+      DB_PASS: ${DB_PASS:-wgacl}
+      ADGUARD_URL: ${ADGUARD_URL:-}
+      ADGUARD_USER: ${ADGUARD_USER:-}
+      ADGUARD_PASS: ${ADGUARD_PASS:-}
     volumes:
       - wg-acl-data:/app/data
       - ./scripts:/app/scripts:ro
-    environment:
-      - FLASK_ENV=production
-      - SECRET_KEY=${SECRET_KEY:-wg-acl-change-me-in-production}
-      - DEFAULT_ADMIN_USER=${DEFAULT_ADMIN_USER:-admin}
-      - DEFAULT_ADMIN_PASS=${DEFAULT_ADMIN_PASS:-admin}
     expose:
       - "5000"
+    depends_on:
+      mariadb:
+        condition: service_healthy
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5000/health')"]
       interval: 30s
       timeout: 5s
       retries: 3
-      start_period: 10s
+      start_period: 15s
     restart: unless-stopped
     networks:
       - wg-acl
@@ -38,3 +67,4 @@ networks:
 
 volumes:
   wg-acl-data:
+  wg-acl-mariadb:

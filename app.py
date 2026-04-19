@@ -15,11 +15,15 @@ from flask_cors import CORS
 from config import Config
 from controllers import ALL_BLUEPRINTS
 from data.seed import seed_all
+import db as database
 
 
 def create_app() -> Flask:
     app = Flask(__name__)
     app.config.from_object(Config)
+
+    # Initialize MariaDB connection and create tables
+    database.init_db(Config.DATABASE_URL)
 
     # CORS — allow frontend origins
     CORS(app, resources={
@@ -49,6 +53,10 @@ def create_app() -> Flask:
                 "/api/services",
                 "/api/access",
                 "/api/yaml",
+                "/api/vpn-users",
+                "/api/dns",
+                "/api/dns/sync",
+                "/api/dns/adguard/rewrites",
             ],
         })
 

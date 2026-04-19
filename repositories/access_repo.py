@@ -1,53 +1,47 @@
 from models.access import AccessEntry
 from repositories.base import BaseRepository
-from config import Config
+from db.tables import AccessEntryRow
 
 
 class AccessRepository(BaseRepository[AccessEntry]):
-    def __init__(self):
-        super().__init__(
-            filepath=Config.ACCESS_FILE,
-            serializer=AccessEntry.to_dict,
-            deserializer=AccessEntry.from_dict,
-        )
+    _Row = AccessEntryRow
+
+    def _to_model(self, row: AccessEntryRow) -> AccessEntry:
+        return AccessEntry(role_id=row.role_id, service_id=row.service_id)
+
+    def _to_row(self, item: AccessEntry) -> AccessEntryRow:
+        return AccessEntryRow(role_id=item.role_id, service_id=item.service_id)
+
+    # Composite PK — override get_by_id to avoid using it (not applicable here)
+    def get_by_id(self, item_id: str, id_field: str = "id") -> AccessEntry | None:
+        raise NotImplementedError("Use has_access() instead")
 
     def has_access(self, role_id: str, service_id: str) -> bool:
-        with self._lock:
-            return any(
-                d.get("roleId") == role_id and d.get("serviceId") == service_id
-                for d in self._read_raw()
-            )
+        with self._session() as s:
+            return s.query(AccessEntryRow).filter_by(
+                role_id=role_id, service_id=service_id
+            ).count() > 0
 
     def get_for_role(self, role_id: str) -> list[AccessEntry]:
-        with self._lock:
-            return [
-                self._deserialize(d)
-                for d in self._read_raw()
-                if d.get("roleId") == role_id
-            ]
+        with self._session() as s:
+            rows = s.query(AccessEntryRow).filter_by(role_id=role_id).all()
+            return [self._to_model(r) for r in rows]
 
     def toggle(self, role_id: str, service_id: str) -> list[AccessEntry]:
-        with self._lock:
-            data = self._read_raw()
-            exists = any(
-                d.get("roleId") == role_id and d.get("serviceId") == service_id
-                for d in data
-            )
-            if exists:
-                data = [
-                    d for d in data
-                    if not (d.get("roleId") == role_id and d.get("serviceId") == service_id)
-                ]
+        with self._session() as s:
+            existing = s.query(AccessEntryRow).filter_by(
+                role_id=role_id, service_id=service_id
+            ).first()
+            if existing:
+                s.delete(existing)
             else:
-                data.append({"roleId": role_id, "serviceId": service_id})
-            self._write_raw(data)
-            return [self._deserialize(d) for d in data]
+                s.add(AccessEntryRow(role_id=role_id, service_id=service_id))
+            s.commit()
+            return [self._to_model(r) for r in s.query(AccessEntryRow).all()]
 
     def remove_role(self, role_id: str) -> None:
-        """Remove all entries for a role."""
-        with self._lock:
-            data = [d for d in self._read_raw() if d.get("roleId") != role_id]
-            self._write_raw(data)
+        with self._session() as s:
+            s.query(AccessEntryRow).filter_by(role_id=role_id).delete()
 
 
 access_repo = AccessRepository()
