@@ -11,13 +11,13 @@ CATEGORY_COLORS = {
     "Red": "#ef4444",
 }
 
-
 @dataclass
 class Service:
     id: str
     name: str
     endpoint: str
     category: str  # Media, Gaming, CRM, Infraestructura, Herramientas, Red
+    url: str | None = None  # subdominio amigable ej. "jellyfin.home.local"
 
     def to_dict(self) -> dict:
         return {
@@ -25,6 +25,7 @@ class Service:
             "name": self.name,
             "endpoint": self.endpoint,
             "category": self.category,
+            "url": self.url,
         }
 
     @classmethod
@@ -34,6 +35,7 @@ class Service:
             name=data["name"],
             endpoint=data["endpoint"],
             category=data["category"],
+            url=data.get("url"),
         )
 
 
@@ -42,6 +44,7 @@ class NewServiceDTO:
     name: str
     endpoint: str
     category: str
+    url: str | None = None
 
     @classmethod
     def from_dict(cls, data: dict) -> "NewServiceDTO":
@@ -49,4 +52,5 @@ class NewServiceDTO:
             name=data["name"],
             endpoint=data["endpoint"],
             category=data["category"],
+            url=data.get("url"),
         )

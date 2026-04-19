@@ -12,6 +12,7 @@ class ServiceRepository(BaseRepository[Service]):
             name=row.name,
             endpoint=row.endpoint,
             category=row.category,
+            url=row.url,
         )
 
     def _to_row(self, item: Service) -> ServiceRow:
@@ -20,6 +21,7 @@ class ServiceRepository(BaseRepository[Service]):
             name=item.name,
             endpoint=item.endpoint,
             category=item.category,
+            url=item.url,
         )
 
     def get_by_category(self) -> dict[str, list[Service]]:

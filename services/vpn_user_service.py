@@ -35,23 +35,29 @@ class VpnUserService:
         )
         return vpn_user_repo.add(user)
 
-    def update(self, user_id: str, dto: NewVpnUserDTO) -> VpnUser | None:
+    def update(self, user_id: str, data: dict) -> tuple[VpnUser | None, str | None]:
         existing = vpn_user_repo.get_by_id(user_id)
         if not existing:
-            return None
-        # If email changed, check it's not already taken by another user
-        if dto.email != existing.email and vpn_user_repo.get_by_email(dto.email):
-            return None
+            return None, "not_found"
+        new_email = data.get("email", existing.email)
+        if new_email != existing.email and vpn_user_repo.get_by_email(new_email):
+            return None, "conflict"
         updated = VpnUser(
             id=user_id,
-            display_name=dto.display_name,
-            email=dto.email,
-            role_id=dto.role_id,
+            display_name=data.get("displayName", existing.display_name),
+            email=new_email,
+            role_id=data.get("roleId", existing.role_id),
             created_at=existing.created_at,
         )
-        return vpn_user_repo.update(user_id, updated)
+        return vpn_user_repo.update(user_id, updated), None
 
-    def delete(self, user_id: str) -> bool:
+    def delete(self, user_id: str, cascade: bool = False) -> bool:
+        if not vpn_user_repo.get_by_id(user_id):
+            return False
+        if cascade:
+            peer_repo.delete_by_user_id(user_id)
+        else:
+            peer_repo.clear_user_id(user_id)
         return vpn_user_repo.delete(user_id)
 
 

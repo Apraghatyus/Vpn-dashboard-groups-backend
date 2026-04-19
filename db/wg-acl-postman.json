@@ -1,0 +1,258 @@
+{
+  "info": {
+    "name": "WG-ACL Manager API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://localhost:5000" },
+    { "key": "token",    "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json.token) {",
+                  "  pm.collectionVariables.set('token', json.token);",
+                  "  console.log('Token guardado');",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/auth/login",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"apraghatyus\",\n  \"password\": \"pR8GcPT6Wjo5d6\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Me (usuario actual)",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/auth/me",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }]
+          }
+        },
+        {
+          "name": "Cambiar contraseña",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/auth/change-password",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type",  "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"oldPassword\": \"pR8GcPT6Wjo5d6\",\n  \"newPassword\": \"nueva-clave-aqui\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Peers",
+      "item": [
+        {
+          "name": "Listar peers",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/peers",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }]
+          }
+        },
+        {
+          "name": "Crear peer",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/peers",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type",  "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"displayName\": \"Test · PC\",\n  \"username\": \"test_pc\",\n  \"ip\": \"10.8.0.99\",\n  \"roleId\": \"gaming\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Ver peer por ID",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/peers/peer-1",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }]
+          }
+        },
+        {
+          "name": "Cambiar rol de peer",
+          "request": {
+            "method": "PUT",
+            "url": "{{base_url}}/api/peers/peer-1/role",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type",  "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"roleId\": \"familia\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Eliminar peer",
+          "request": {
+            "method": "DELETE",
+            "url": "{{base_url}}/api/peers/peer-1",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Roles",
+      "item": [
+        {
+          "name": "Listar roles",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/roles",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }]
+          }
+        },
+        {
+          "name": "Crear rol",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/roles",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type",  "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": \"invitados\",\n  \"displayName\": \"Invitados\",\n  \"description\": \"Acceso limitado temporal\",\n  \"color\": \"#6366f1\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Ver rol por ID",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/roles/admin",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }]
+          }
+        },
+        {
+          "name": "Eliminar rol",
+          "request": {
+            "method": "DELETE",
+            "url": "{{base_url}}/api/roles/invitados",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Servicios",
+      "item": [
+        {
+          "name": "Listar servicios",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/services",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }]
+          }
+        },
+        {
+          "name": "Crear servicio",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/services",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type",  "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Plex\",\n  \"endpoint\": \"100.75.203.14:32400\",\n  \"category\": \"Media\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Acceso (Matriz)",
+      "item": [
+        {
+          "name": "Ver matriz completa",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/access",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }]
+          }
+        },
+        {
+          "name": "Toggle permiso (activar/desactivar)",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/access/toggle",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type",  "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"roleId\": \"gaming\",\n  \"serviceId\": \"jellyfin\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "YAML",
+      "item": [
+        {
+          "name": "Generar YAML (JSON response)",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/yaml",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }]
+          }
+        },
+        {
+          "name": "Descargar YAML (archivo)",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/yaml/download",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "Health check",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/health"
+          }
+        }
+      ]
+    }
+  ]
+}

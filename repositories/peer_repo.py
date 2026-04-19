@@ -48,5 +48,13 @@ class PeerRepository(BaseRepository[Peer]):
         with self._session() as s:
             return s.query(PeerRow).filter_by(status="online").count()
 
+    def delete_by_user_id(self, user_id: str) -> None:
+        with self._session() as s:
+            s.query(PeerRow).filter_by(user_id=user_id).delete()
+
+    def clear_user_id(self, user_id: str) -> None:
+        with self._session() as s:
+            s.query(PeerRow).filter_by(user_id=user_id).update({"user_id": ""})
+
 
 peer_repo = PeerRepository()

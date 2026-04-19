@@ -27,6 +27,24 @@ class PeerService:
         )
         return peer_repo.add(peer)
 
+    def update(self, peer_id: str, data: dict) -> Peer | None:
+        peer = peer_repo.get_by_id(peer_id)
+        if not peer:
+            return None
+        field_map = {
+            "displayName": "display_name",
+            "username": "username",
+            "ip": "ip",
+            "roleId": "role_id",
+            "deviceName": "device_name",
+        }
+        for camel, snake in field_map.items():
+            if camel in data:
+                setattr(peer, snake, data[camel])
+        if "userId" in data:
+            peer.user_id = data["userId"] or ""
+        return peer_repo.update(peer_id, peer)
+
     def update_role(self, peer_id: str, role_id: str) -> Peer | None:
         peer = peer_repo.get_by_id(peer_id)
         if not peer:

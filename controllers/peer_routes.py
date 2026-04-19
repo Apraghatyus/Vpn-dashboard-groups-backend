@@ -52,6 +52,16 @@ def update_role(peer_id: str):
     return jsonify(peer.to_dict())
 
 
+@peer_bp.route("/<peer_id>", methods=["PUT"])
+@require_auth
+def update(peer_id: str):
+    data = request.get_json(silent=True) or {}
+    peer = peer_service.update(peer_id, data)
+    if not peer:
+        return jsonify({"error": "Peer no encontrado"}), 404
+    return jsonify(peer.to_dict())
+
+
 @peer_bp.route("/<peer_id>", methods=["DELETE"])
 @require_auth
 def delete(peer_id: str):

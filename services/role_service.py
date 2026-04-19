@@ -24,6 +24,19 @@ class RoleService:
         )
         return role_repo.add(role)
 
+    def update(self, role_id: str, data: dict) -> Role | None:
+        existing = role_repo.get_by_id(role_id)
+        if not existing:
+            return None
+        updated = Role(
+            id=role_id,
+            display_name=data.get("displayName", existing.display_name),
+            description=data.get("description", existing.description),
+            color=data.get("color", existing.color),
+            created_at=existing.created_at,
+        )
+        return role_repo.update(role_id, updated)
+
     def remove(self, role_id: str) -> bool:
         # Also clean up access entries for this role
         access_repo.remove_role(role_id)

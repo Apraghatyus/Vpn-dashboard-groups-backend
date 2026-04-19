@@ -37,6 +37,16 @@ def get_one(role_id: str):
     return jsonify(role.to_dict())
 
 
+@role_bp.route("/<role_id>", methods=["PUT"])
+@require_auth
+def update(role_id: str):
+    data = request.get_json(silent=True) or {}
+    role = role_service.update(role_id, data)
+    if not role:
+        return jsonify({"error": "Rol no encontrado"}), 404
+    return jsonify(role.to_dict())
+
+
 @role_bp.route("/<role_id>", methods=["DELETE"])
 @require_auth
 def delete(role_id: str):

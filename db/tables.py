@@ -39,6 +39,7 @@ class ServiceRow(Base):
     id: Mapped[str] = mapped_column(String(64), primary_key=True)
     name: Mapped[str] = mapped_column(String(256))
     endpoint: Mapped[str] = mapped_column(String(256))
+    url: Mapped[str | None] = mapped_column(String(512), nullable=True)
     category: Mapped[str] = mapped_column(String(64))
 
 
