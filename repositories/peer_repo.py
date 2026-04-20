@@ -18,6 +18,7 @@ class PeerRepository(BaseRepository[Peer]):
             created_at=row.created_at,
             user_id=row.user_id,
             device_name=row.device_name,
+	    wg_easy_id=row.wg_easy_id or "",
         )
 
     def _to_row(self, item: Peer) -> PeerRow:
@@ -32,6 +33,7 @@ class PeerRepository(BaseRepository[Peer]):
             created_at=item.created_at,
             user_id=item.user_id,
             device_name=item.device_name,
+	    wg_easy_id=item.wg_easy_id or None,
         )
 
     def get_by_role(self, role_id: str) -> list[Peer]:

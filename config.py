@@ -29,6 +29,10 @@ class Config:
         "DATABASE_URL",
         f"mysql+pymysql://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}",
     )
+    # WG-Easy integration
+    WG_EASY_URL = os.environ.get("WG_EASY_URL")
+    WG_EASY_PASSWORD = os.environ.get("WG_EASY_PASSWORD", "")
+    WG_EASY_TIMEOUT = int(os.environ.get("WG_EASY_TIMEOUT", "10"))
 
     # JWT
     SECRET_KEY = os.environ.get("SECRET_KEY", "wg-acl-change-me-in-production")
@@ -52,3 +56,13 @@ class Config:
     WG_PORT              = os.environ.get("WG_PORT", "51820")
     WG_SUBNET            = os.environ.get("WG_SUBNET", "10.8.0.0/24")
     WG_DNS               = os.environ.get("WG_DNS", "10.8.0.1")
+
+    @classmethod
+    def validate(cls):
+        """Llamar desde app factory al arrancar. Falla ruidoso si falta algo crítico."""
+        if not cls.WG_EASY_PASSWORD:
+            raise RuntimeError(
+                "WG_EASY_PASSWORD no está seteada en el entorno. "
+                "La integración con WG-Easy no funcionará. "
+                "Agregala al .env del manager."
+            )

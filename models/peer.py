@@ -16,6 +16,7 @@ class Peer:
     created_at: float = field(default_factory=time.time)
     user_id: str = ""                # FK to VpnUser (owner of this device)
     device_name: str = ""            # e.g. "MacBook Pro", "iPhone 15"
+    wg_easy_id: str = ""
 
     def to_dict(self) -> dict:
         """Serialize to camelCase dict for API response."""
@@ -30,7 +31,9 @@ class Peer:
             "createdAt": self.created_at,
             "userId": self.user_id,
             "deviceName": self.device_name,
-        }
+            "wgEasyId": self.wg_easy_id,
+	    "hasRealConfig": bool(self.wg_easy_id),
+	}
 
     @classmethod
     def from_dict(cls, data: dict) -> "Peer":
@@ -46,6 +49,7 @@ class Peer:
             created_at=data.get("createdAt", data.get("created_at", time.time())),
             user_id=data.get("userId", data.get("user_id", "")),
             device_name=data.get("deviceName", data.get("device_name", "")),
+	    wg_easy_id=data.get("wgEasyId", data.get("wg_easy_id", "")),
         )
 
 

@@ -15,6 +15,7 @@ from config import Config
 from controllers import ALL_BLUEPRINTS
 import db as database
 
+Config.validate()
 
 def create_app() -> Flask:
     app = Flask(__name__)

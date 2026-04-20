@@ -21,7 +21,7 @@ class PeerRow(Base):
     created_at: Mapped[float] = mapped_column(Float)
     user_id: Mapped[str] = mapped_column(String(64))
     device_name: Mapped[str] = mapped_column(String(256))
-
+    wg_easy_id = Column(String(128), nullable=True, unique=True, index=True)
 
 class RoleRow(Base):
     __tablename__ = "roles"
