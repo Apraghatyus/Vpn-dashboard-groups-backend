@@ -39,6 +39,10 @@ def create():
         peer = peer_service.create(dto)
     except WgEasyError as e:
         return jsonify(e.to_dict()), 502
+    except Exception as e:
+        import logging
+        logging.getLogger(__name__).exception("Unexpected error creating peer")
+        return jsonify({"error": "internal_error", "detail": str(e)}), 500
     return jsonify(peer.to_dict()), 201
 
 

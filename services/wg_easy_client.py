@@ -90,27 +90,36 @@ class WgEasyClient:
         """
         Crea un cliente en WG-Easy. WG-Easy asigna IP automáticamente.
         Devuelve el cliente creado con {id, address, publicKey, ...}.
+
+        WG-Easy v14 responde con {"success": true} sin el objeto creado,
+        así que después de crear, re-listamos y matcheamos por nombre.
+        v15+ devuelve el objeto directamente — si viene con 'id' lo usamos.
         """
         r = self._req("POST", "/api/wireguard/client", json={"name": name})
         if r.status_code not in (200, 201, 204):
-            raise WgEasyError(f"create_client({name!r}) HTTP {r.status_code}",
-                              status=r.status_code, body=r.text)
+            raise WgEasyError(
+                f"create_client({name!r}) HTTP {r.status_code}",
+                status=r.status_code, body=r.text,
+            )
 
-        # Algunos builds de v14 devuelven el objeto, otros 204 vacío.
-        # Si no hay body, re-listamos y matchemos por nombre.
-        if r.status_code == 200 and r.text:
+        # Solo devolvemos el payload directo si trae un 'id' útil.
+        # Caso contrario (v14 responde {"success": true}), caemos al fallback.
+        if r.text:
             try:
-                return r.json()
+                payload = r.json()
+                if isinstance(payload, dict) and payload.get("id"):
+                    return payload
             except ValueError:
                 pass
 
+        # Fallback: re-listar y matchear por nombre (caso de v14)
         clients = self.list_clients()
         matches = [c for c in clients if c.get("name") == name]
         if not matches:
             raise WgEasyError(
                 f"create_client() OK pero {name!r} no aparece en la lista"
             )
-        # El más reciente (mayor createdAt) gana ante duplicados
+        # El más reciente gana si hay duplicados de nombre
         return max(matches, key=lambda c: c.get("createdAt", ""))
 
     def delete_client(self, client_id: str) -> None:
